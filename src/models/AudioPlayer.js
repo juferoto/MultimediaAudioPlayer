@@ -5,7 +5,8 @@ class AudioPlayer {
         this.songs = [];
         this.queue = [];
         this.player = new Audio();
-        let src = "songs/1.mp3";
+        
+        //let src = "songs/1.mp3";
 
         this._gui = {
             progressBar: { value: null, DOMElement: null },
@@ -15,6 +16,12 @@ class AudioPlayer {
             totalTime: { value: null, DOMElement: null },
             albumCover: { value: null, DOMElement: null }
         };
+
+        if (params.hasOwnProperty("songs")) {
+            //console.log(params.songs)
+            this.songs = params.songs;
+            this._loadSong(this.songs[0]);
+        }
 
         if (params.hasOwnProperty("gui")) {
             var { progressBar, artistName, songName, currentTime, totalTime, albumCover } = params.gui;
@@ -30,8 +37,6 @@ class AudioPlayer {
             add: null
         }
 
-        this._loadSong(src);
-
         if (params.hasOwnProperty("buttons")) {
             var { queue, volume, back, playPause, next, add } = params.buttons;
             this._initButtons(queue, volume, back, playPause, next, add);
@@ -39,8 +44,8 @@ class AudioPlayer {
 
     }
 
-    _loadSong(src) {
-        this.player.src = src;
+    _loadSong(song) {
+        this.player.src = song.file;
         this.player.onloadedmetadata = () => {
             this.gui = {
                 totalTime: { value: this.player.duration, DOMElement: this.gui.totalTime.DOMElement },
@@ -115,7 +120,7 @@ class AudioPlayer {
                 toAssign[key] = elements[key];
                 if (Object.keys(actions).length > 0) {
                     if (actions.hasOwnProperty(key)) {
-                        console.log(key);
+                        //console.log(key);
                         this._addClickEvent(toAssign[key], actions[key]);
                     }
                 }
@@ -140,7 +145,20 @@ class AudioPlayer {
 
             },
             back: () => false,
-            next: () => false,
+            next: () => {
+                this.player.pause();
+                this._toggleIcon(this.buttons.playPause, "fa-play", "fa-pause");
+                let el = this.songs.find(element => this.player.src.includes(element.file));
+                let obj = this.songs.indexOf(el);
+                if (obj == this.songs.length-1) {
+                    obj = -1;
+                }
+                this._loadSong(this.songs[obj+1]);
+                //this.playPause();
+
+                //console.log(obj)
+                
+            },
             add: () => false,
 
         }
@@ -149,6 +167,13 @@ class AudioPlayer {
 
     get buttons() {
         return this._buttons;
+    }
+
+    _showTime(sec){
+        var sign = sec < 0 ? "-" : "";
+        var min = Math.floor(sec/60)
+        sec = Math.round(Math.abs(sec) % 60);
+        return sign + min + ":" + (sec < 10 ? "0" + sec : sec)
     }
 
     set gui(elments) {
@@ -162,7 +187,8 @@ class AudioPlayer {
                     currentTime: {value: newCurrentTime, DOMElement: this.gui.currentTime.DOMElement}
                 }
             }
-        }
+        }        
+        
         this._assignValues(this._gui, elments, actions);
         this._updateBasigGUIElement(this.gui.totalTime);
         this._updateBasigGUIElement(this.gui.currentTime);
@@ -170,7 +196,7 @@ class AudioPlayer {
 
     _updateBasigGUIElement(el) {
         if (el.DOMElement instanceof HTMLElement) {
-            el.DOMElement.innerHTML = el.value;
+            el.DOMElement.innerHTML = this._showTime(el.value);
         }
     }
 
