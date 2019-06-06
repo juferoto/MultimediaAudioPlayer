@@ -2,8 +2,8 @@ class AudioPlayer {
 
     constructor(params) {
 
-        this.songs = [];
-        this.queue = [];
+        this._songs = [];
+        this._queue = [];
         this.player = new Audio();
         
         //let src = "songs/1.mp3";
@@ -19,8 +19,9 @@ class AudioPlayer {
 
         if (params.hasOwnProperty("songs")) {
             //console.log(params.songs)
-            this.songs = params.songs;
-            this._loadSong(this.songs[0]);
+            this._songs = params.songs;
+            this._queue = this._songs;
+            this._loadSong(this._songs[0]);
         }
 
         if (params.hasOwnProperty("gui")) {
@@ -87,7 +88,6 @@ class AudioPlayer {
     }
 
     _addClickEvent(element, callback) {
-        //console.log(element);
         if (element instanceof HTMLElement) {
             element.onclick = callback;
         } else {
@@ -120,7 +120,6 @@ class AudioPlayer {
                 toAssign[key] = elements[key];
                 if (Object.keys(actions).length > 0) {
                     if (actions.hasOwnProperty(key)) {
-                        //console.log(key);
                         this._addClickEvent(toAssign[key], actions[key]);
                     }
                 }
@@ -138,31 +137,57 @@ class AudioPlayer {
                 }
                 this._toggleIcon(this.buttons.playPause, "fa-play", "fa-pause");
             },
-            queue: () => false,
+            queue: () => {
+                /*if (this.gui.songName.DOMElement.style.visibility == "hidden")
+                    this.gui.songName.DOMElement.style.visibility = "visible";
+                else
+                    this.gui.songName.DOMElement.style.visibility = "hidden";*/
+                //_loadList() TODO
+                /*Create this kind of elements
+                <div class="infoPlaylist">
+                    <div class="songName">Sure</div>
+                    <div class="artistName">Emarosa</div>
+                </div>
+                 */
+            },
             volume: () => {
                 this.player.volume = (this.player.volume != 0) ? 0 : 1
                 this._toggleIcon(this.buttons.volume, "fa-volume-up", "fa-volume-mute");
 
             },
-            back: () => false,
+            back: () => {
+                this._playTrack(-1, null);                
+            },
             next: () => {
-                this.player.pause();
-                this._toggleIcon(this.buttons.playPause, "fa-play", "fa-pause");
-                let el = this.songs.find(element => this.player.src.includes(element.file));
-                let obj = this.songs.indexOf(el);
-                if (obj == this.songs.length-1) {
-                    obj = -1;
-                }
-                this._loadSong(this.songs[obj+1]);
-                //this.playPause();
-
-                //console.log(obj)
-                
+                this._playTrack(1, null);                
             },
             add: () => false,
 
         }
         this._assignValues(this._buttons, btns, actions);
+    }
+
+    _playTrack(location, fileName) 
+    {
+        this.player.pause();
+        let i = this.buttons.playPause.querySelector("i");
+        i.classList.remove("fa-pause");
+        i.classList.add("fa-play");
+        let position;
+        if (fileName == null)
+            position = this._songs.findIndex(element => this.player.src.includes(element.file));
+        else
+            position = this._songs.findIndex(element => this.player.src.includes(fileName));
+        if (location > 0 && position == this._songs.length-1) {
+            position = -1;
+        } else if (location < 0 && position == 0) {
+            position = this._songs.length;
+        }
+        let songObj = this._songs[position+location];
+        this._loadSong(songObj);
+        this.gui.artistName.DOMElement.innerHTML = songObj.artist;
+        this.gui.songName.DOMElement.innerHTML = songObj.name;
+        this.gui.albumCover.DOMElement.style.backgroundImage = `url('${songObj.cover}')`;
     }
 
     get buttons() {

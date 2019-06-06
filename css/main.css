@@ -26,6 +26,18 @@ body{
     background: var(--black-red-c4);
 }
 
+#playList{
+    width: 200px;
+    height: 350px;
+    /*visibility: hidden;*/
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    border-radius: var(--border-radius);
+    /*display: flex;*/
+    background: #7f8c8d;
+    /*align-items: flex-end;*/
+    background-size: cover;
+}
+
 #player{
     width: 350px;
     height: 350px;
@@ -60,6 +72,33 @@ body{
     align-items: center;
     font-size: 80%;
 } 
+
+.infoPlaylist, .btns{
+    flex: 1.5;
+}
+
+.infoPlaylist{
+    flex-flow: column;
+    align-content: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.infoPlaylist div{
+    display: flex;
+    justify-content: center;
+    text-transform: uppercase;
+}
+
+.infoPlaylist .songName{
+    font-weight: bold;
+    font-size: 130%;
+}
+
+.infoPlaylist .artistName{
+    font-size: 70%;
+    color: rgba(255,255,255,0.7);
+}
 
 .info, .btns{
     flex: 1.5;
